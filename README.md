@@ -18,6 +18,8 @@ An LLM-based system that flags inconsistencies in text/audio/video and verifies 
 
 ---
 
+![Workflow Diagram](workflow.png)
+
 ## System Overview (Pipeline)
 
 ### 1. Ingestion Layer
