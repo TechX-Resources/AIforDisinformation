@@ -18,7 +18,7 @@ An LLM-based system that flags inconsistencies in text/audio/video and verifies 
 
 ---
 
-![Workflow Diagram](assets/workflow_diagram.png)
+![Workflow Diagram](assets/workflow.png)
 
 ## System Overview (Pipeline)
 
