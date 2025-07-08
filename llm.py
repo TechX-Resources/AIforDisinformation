@@ -1,8 +1,11 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+QWEN8B = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
+QWEN32B = "Qwen/Qwen3-32B"
+
 
 class QwenChatbot:
-    def __init__(self, model_name="Qwen/Qwen3-32B"):
+    def __init__(self, model_name=QWEN8B):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForCausalLM.from_pretrained(model_name)
         self.history = []
@@ -33,14 +36,26 @@ class QwenChatbot:
 
     def check_truthiness(self, user_input):
         # system prompt
+        grading_prompt = """
+        You are tasked with evaluating the truthfulness of a given input statement. 
+        Assign a numerical score from 0 to 5 based on the following grading scale:
+
+        5 – Completely True: All claims are verifiable, accurate, and supported by reliable evidence.
+        4 – Mostly True: Minor inaccuracies may exist, but the core facts are accurate and not misleading.
+        3 – Half True: Roughly an equal mix of accurate and inaccurate or misleading information.
+        2 – Mostly False: A small element of truth exists, but the claim is mostly inaccurate or misrepresented.
+        1 – Completely False: The statement is entirely inaccurate, fabricated, or contradicted by reliable sources.
+        0 – Not Evaluated: There is insufficient information to determine the truthfulness of the statement.
+
+        Your task:
+        1. Assign a score (0–5).
+        2. Briefly explain your reasoning.
+        """
+
         self.history = [
             {
                 "role": "system",
-                "content": (
-                    "You are a fact-checking assistant. When the user makes a claim or shares news, "
-                    "compare it against reliable online sources such as Wikipedia or major news websites. "
-                    "Evaluate the truthfulness of the input and explain your reasoning."
-                ),
+                "content": (grading_prompt),
             }
         ]
 
@@ -80,22 +95,7 @@ class QwenChatbot:
 if __name__ == "__main__":
     chatbot = QwenChatbot()
 
-    # First input (without /think or /no_think tags, thinking mode is enabled by default)
     user_input_1 = "How many r's in strawberries?"
     print(f"User: {user_input_1}")
     response_1 = chatbot.generate_response(user_input_1)
     print(f"Bot: {response_1}")
-    print("----------------------")
-
-    # Second input with /no_think
-    user_input_2 = "Then, how many r's in blueberries? /no_think"
-    print(f"User: {user_input_2}")
-    response_2 = chatbot.generate_response(user_input_2)
-    print(f"Bot: {response_2}")
-    print("----------------------")
-
-    # Third input with /think
-    user_input_3 = "Really? /think"
-    print(f"User: {user_input_3}")
-    response_3 = chatbot.generate_response(user_input_3)
-    print(f"Bot: {response_3}")
