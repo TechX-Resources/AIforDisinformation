@@ -2,11 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import wikipediaapi
 
-# Replace with your API keys
 GOOGLE_FACT_CHECK_API_KEY = "YOUR_GOOGLE_API_KEY"
 GNEWS_API_KEY = "YOUR_GNEWS_API_KEY"
 
-# -------------------- 1. Google Fact Check API --------------------
 def verify_with_google_fact_check(claim):
     url = f"https://factchecktools.googleapis.com/v1alpha1/claims:search?query={claim}&key={GOOGLE_FACT_CHECK_API_KEY}"
     response = requests.get(url)
@@ -16,7 +14,6 @@ def verify_with_google_fact_check(claim):
         return [c["text"] + " - " + c["claimReview"][0]["textualRating"] for c in claims] if claims else ["No result."]
     return ["Google Fact Check API error."]
 
-# -------------------- 2. Wikipedia / Wikidata --------------------
 def verify_with_wikipedia(claim):
     wiki = wikipediaapi.Wikipedia(
         user_agent="FactCheckBot/1.0 (contact: youremail@example.com)",  # Use your info here
@@ -25,7 +22,6 @@ def verify_with_wikipedia(claim):
     page = wiki.page(claim)
     return [page.summary[:500]] if page.exists() else ["No Wikipedia match."]
 
-# -------------------- 3. GNews API --------------------
 def verify_with_gnews(claim):
     url = f"https://gnews.io/api/v4/search?q={claim}&token={GNEWS_API_KEY}&lang=en"
     response = requests.get(url)
@@ -34,7 +30,6 @@ def verify_with_gnews(claim):
         return [f"{a['title']} - {a['source']['name']}" for a in articles[:3]]
     return ["GNews API error."]
 
-# -------------------- 4. Snopes (Web Scraping) --------------------
 def verify_with_snopes(claim):
     search_url = f"https://www.snopes.com/?s={claim.replace(' ', '+')}"
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -43,9 +38,8 @@ def verify_with_snopes(claim):
     results = soup.select("article h2.entry-title a")
     return [link.text.strip() for link in results[:3]] if results else ["No Snopes result."]
 
-# -------------------- Main Aggregator --------------------
 def verify_claim(claim):
-    print(f"\n🔎 Verifying Claim: \"{claim}\"\n")
+    print(f"\n Verifying Claim: \"{claim}\"\n")
 
     sources = {
         "Google Fact Check": verify_with_google_fact_check(claim),
@@ -55,13 +49,13 @@ def verify_claim(claim):
     }
 
     for source, results in sources.items():
-        print(f"📌 {source}:")
+        print(f"{source}:")
         for r in results:
             print("  •", r)
         print()
     return sources
 
-# -------------------- Example --------------------
+# Example
 if __name__ == "__main__":
     test_claim = "COVID-19 vaccines cause infertility"
     verify_claim(test_claim)
