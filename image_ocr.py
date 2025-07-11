@@ -28,5 +28,5 @@ def process_folder(folder_path, output_folder="ocr_results"):
     print("OCR completed for all images.")
 
 # Example usage
-# if __name__ == "__main__":
-#     process_folder("images")
+if __name__ == "__main__":
+    process_folder("images")
