@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import wikipediaapi
 
+# Replace with your API keys
 GOOGLE_FACT_CHECK_API_KEY = "YOUR_GOOGLE_API_KEY"
 GNEWS_API_KEY = "YOUR_GNEWS_API_KEY"
 
@@ -14,14 +15,6 @@ def verify_with_google_fact_check(claim):
         return [c["text"] + " - " + c["claimReview"][0]["textualRating"] for c in claims] if claims else ["No result."]
     return ["Google Fact Check API error."]
 
-def verify_with_wikipedia(claim):
-    wiki = wikipediaapi.Wikipedia(
-        user_agent="FactCheckBot/1.0 (contact: youremail@example.com)",  # Use your info here
-        language="en"
-    )
-    page = wiki.page(claim)
-    return [page.summary[:500]] if page.exists() else ["No Wikipedia match."]
-
 def verify_with_gnews(claim):
     url = f"https://gnews.io/api/v4/search?q={claim}&token={GNEWS_API_KEY}&lang=en"
     response = requests.get(url)
@@ -29,6 +22,15 @@ def verify_with_gnews(claim):
         articles = response.json().get("articles", [])
         return [f"{a['title']} - {a['source']['name']}" for a in articles[:3]]
     return ["GNews API error."]
+
+def verify_with_wikipedia(claim):
+    wiki = wikipediaapi.Wikipedia(
+        user_agent="FactCheckBot/1.0 (contact: youremail@example.com)",
+        language="en"
+    )
+    page = wiki.page(claim)
+    return [page.summary[:500]] if page.exists() else ["No Wikipedia match."]
+
 
 def verify_with_snopes(claim):
     search_url = f"https://www.snopes.com/?s={claim.replace(' ', '+')}"
@@ -39,7 +41,7 @@ def verify_with_snopes(claim):
     return [link.text.strip() for link in results[:3]] if results else ["No Snopes result."]
 
 def verify_claim(claim):
-    print(f"\n Verifying Claim: \"{claim}\"\n")
+    print(f"\n🔎 Verifying Claim: \"{claim}\"\n")
 
     sources = {
         "Google Fact Check": verify_with_google_fact_check(claim),
@@ -55,7 +57,14 @@ def verify_claim(claim):
         print()
     return sources
 
-# Example
-if __name__ == "__main__":
-    test_claim = "COVID-19 vaccines cause infertility"
-    verify_claim(test_claim)
+from duckduckgo_search import DDGS
+
+def verify_with_duckduckgo(query, max_results=5):
+    results = []
+    with DDGS() as ddgs:
+        for r in ddgs.text(query, max_results=max_results):
+            title = r.get("title", "")
+            snippet = r.get("body", "")
+            url = r.get("href", "")
+            results.append(f"{title}: {snippet} (Source: {url})")
+    return results
