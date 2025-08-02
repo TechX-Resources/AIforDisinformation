@@ -9,3 +9,4 @@ nltk
 whisper
 groq
 ddgs
+transformers
