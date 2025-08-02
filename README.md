@@ -16,6 +16,40 @@ An LLM-based system that flags inconsistencies in text/audio/video and verifies 
 - Real-time or batch processing of user content  
 - Language-agnostic entity extraction and fact verification  
 
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourname/AIforDisinformation.git
+cd AIforDisinformation
+```
+
+### 2. Install Requirements
+Make sure you have Python 3.11+ installed. Then install dependencies:
+```
+pip install -r requirements.txt
+```
+
+### 3. Run the Application
+```
+python app.py
+```
+This will start the Gradio interface locally:
+```
+http://127.0.0.1:7860
+```
+
+### Image Deepfake Detection
+- Upload an image using the Image Input section of the interface.
+- The model will evaluate it and indicate whether it is AI-generated (deepfake) or real, along with a confidence score.
+- ⚠️ This runs entirely on your machine, so performance depends on your local hardware (a GPU is recommended for faster inference).
+
+### Text Disinformation Detection
+- Enter text or a factual claim in the Text Input (Chatbot) section.
+- The system analyzes it using a large language model and checks for factuality.
+- It uses tools like DuckDuckGo Search, structured knowledge bases, and custom logic to verify claims.
+- Outputs include a trust score, counter-narrative suggestions, and citations.
 ---
 
 ![Workflow Diagram](assets/workflow.png)
