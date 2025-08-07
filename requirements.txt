@@ -1,0 +1,12 @@
+gradio
+timm
+torch
+torchvision
+Pillow
+bs4
+pytesseract
+nltk
+whisper
+groq
+ddgs
+transformers
