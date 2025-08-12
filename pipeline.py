@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 from timm import create_model
 from torchvision import transforms
+from image_ocr import *
+from audio_to_text import *
 
 
 def fact_check_pipeline(user_input, api_key):
@@ -30,7 +32,18 @@ def fact_check_pipeline(user_input, api_key):
     return evaluation
 
 
-def deepfake_detection(image_path, model_path="model_weights/xception_deepfake.pth"):
+def audio_to_text(file_path):
+    text = transcribe_audio(file_path)
+    return text
+
+
+def image_to_text(file_path):
+    text = ocr_image(file_path)
+    return text
+
+
+# Using xceptionNet
+def xceptionNet_inference(image_path, model_path="model_weights/xception_deepfake.pth"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_class = 2
 

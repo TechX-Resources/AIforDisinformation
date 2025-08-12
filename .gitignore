@@ -2,3 +2,5 @@
 __pycache__/
 .vscode/
 api_key.txt
+test.py
+.gradio/
