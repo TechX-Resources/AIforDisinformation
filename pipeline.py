@@ -32,8 +32,8 @@ def fact_check_pipeline(user_input, api_key):
     return evaluation
 
 
-def audio_to_text(file_path):
-    text = transcribe_audio(file_path)
+def audio_to_text(file_path, apikey):
+    text = transcribe_audio(file_path, apikey)
     return text
 
 
@@ -44,6 +44,49 @@ def image_to_text(file_path):
 
 # Using xceptionNet
 def xceptionNet_inference(image_path, model_path="model_weights/xception_deepfake.pth"):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    num_class = 2
+
+    # Create model
+    model = create_model("xception", pretrained=False)
+    model.fc = nn.Linear(model.fc.in_features, num_class)
+
+    # Load state dict, strip 'module.' if needed
+    state_dict = torch.load(model_path, map_location=device)
+    if any(k.startswith("module.") for k in state_dict.keys()):
+        state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
+    model.load_state_dict(state_dict)
+
+    model = model.to(device)
+    model.eval()
+
+    transform = transforms.Compose(
+        [
+            transforms.Resize((299, 299)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5] * 3, [0.5] * 3),
+        ]
+    )
+
+    # Load and preprocess image
+    img = Image.open(image_path).convert("RGB")
+    img = transform(img).unsqueeze(0).to(device)
+
+    # Run inference
+    with torch.no_grad():
+        output = model(img)
+        probs = torch.softmax(output, dim=1)
+        pred = torch.argmax(probs, dim=1).item()
+        confidence = probs[0, pred].item()
+
+    is_fake = pred == 0
+    confidence_text = (
+        f"Confidence: {confidence * 100:.2f}% ({'Fake' if is_fake else 'Real'})"
+    )
+    return is_fake, confidence_text
+
+
+def resnet_inference(image_path, model_path="model_weights/resnet.pth"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_class = 2
 

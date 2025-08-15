@@ -1,11 +1,20 @@
 import whisper
 import os
+from groq import Groq
 
-def transcribe_audio(file_path):
-    model = whisper.load_model("base")  # you can change to "small", "medium", etc.
-    print(f"Transcribing: {file_path} ...")
-    result = model.transcribe(file_path)
-    return result["text"]
+
+def transcribe_audio(file_path, apikey):
+    client = Groq(api_key=apikey)
+
+    with open(file_path, "rb") as audio_file:
+        print(f"Transcribing: {file_path} ...")
+        result = client.audio.transcriptions.create(
+            file=(os.path.basename(file_path), audio_file.read()),
+            model="whisper-large-v3",
+            response_format="text",
+        )
+    return result
+
 
 def process_audio_folder(folder_path, output_folder="transcriptions"):
     os.makedirs(output_folder, exist_ok=True)
@@ -21,6 +30,7 @@ def process_audio_folder(folder_path, output_folder="transcriptions"):
                 f.write(transcript)
 
     print("All audio files transcribed.")
+
 
 # Example usage
 if __name__ == "__main__":

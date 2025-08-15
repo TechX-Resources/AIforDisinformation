@@ -70,17 +70,20 @@ def ocr_extraction(image_path):
     return result
 
 
-def asr_extraction(audio_path):
+def asr_extraction(audio_path, apikey):
     if not audio_path:
         return False
-    result = audio_to_text(audio_path)
+    result = audio_to_text(audio_path, apikey)
     return result
 
 
-def check_deepfake(image_path):
+def check_deepfake(image_path, model):
     if not image_path:
         return False
-    result = xceptionNet_inference(image_path)
+    if model == "XceptionNet":
+        result = xceptionNet_inference(image_path)
+    elif model == "ResNet":
+        result = resnet_inference(image_path)
     return result
 
 
@@ -134,7 +137,9 @@ with gr.Blocks(title="AI for Disinformation") as demo:
                     asr_response_tb = gr.Textbox(label="AI Response", lines=5)
 
             asr_run_btn.click(
-                fn=asr_extraction, inputs=[asr_audio], outputs=[asr_output_tb]
+                fn=asr_extraction,
+                inputs=[asr_audio, api_key_tb],
+                outputs=[asr_output_tb],
             )
             asr_ask_btn.click(
                 fn=chat_reply,
@@ -143,6 +148,11 @@ with gr.Blocks(title="AI for Disinformation") as demo:
             )
 
         with gr.Tab("Deepfake Detection"):
+            model = gr.Dropdown(
+                choices=["ResNet", "XceptionNet"],
+                value="ResNet",
+                label="Detection Model",
+            )
             gr.Markdown("## Image Input (Deepfake Detection)")
             gr.Markdown("### Run time depends on your hardware")
             image = gr.Image(type="filepath", label="Upload image")
@@ -150,7 +160,9 @@ with gr.Blocks(title="AI for Disinformation") as demo:
             result = gr.Checkbox(label="Is AI generated?", interactive=False)
             confidence_md = gr.Markdown()
             run_btn.click(
-                fn=check_deepfake, inputs=[image], outputs=[result, confidence_md]
+                fn=check_deepfake,
+                inputs=[image, model],
+                outputs=[result, confidence_md],
             )
 
     demo.load(load_key, inputs=None, outputs=[api_key_tb, status_md])
