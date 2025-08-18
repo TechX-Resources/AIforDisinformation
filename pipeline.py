@@ -7,6 +7,7 @@ from timm import create_model
 from torchvision import transforms
 from image_ocr import *
 from audio_to_text import *
+import torchvision.models as models
 
 
 def fact_check_pipeline(user_input, api_key):
@@ -90,15 +91,14 @@ def xceptionNet_inference(image_path, model_path="model_weights/xception_deepfak
     return is_fake, confidence_text
 
 
-def resnet_inference(image_path, model_path="model_weights/resnet.pth"):
+def resnet_inference(image_path, model_path="model_weights/resnet18_full_model.pth"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    num_class = 2
 
     # Create model
-    model = create_model("xception", pretrained=False)
-    model.fc = nn.Linear(model.fc.in_features, num_class)
+    model = models.resnet18(pretrained=False)
+    model.fc = nn.Linear(model.fc.in_features, 2)  # 2 classes
 
-    # Load state dict, strip 'module.' if needed
+    # Load state dict
     state_dict = torch.load(model_path, map_location=device)
     if any(k.startswith("module.") for k in state_dict.keys()):
         state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
@@ -109,9 +109,9 @@ def resnet_inference(image_path, model_path="model_weights/resnet.pth"):
 
     transform = transforms.Compose(
         [
-            transforms.Resize((299, 299)),
+            transforms.Resize((128, 128)),
             transforms.ToTensor(),
-            transforms.Normalize([0.5] * 3, [0.5] * 3),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
 
