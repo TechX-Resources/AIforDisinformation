@@ -1,7 +1,7 @@
 import os
 import gradio as gr
 from pathlib import Path
-from pipeline import *
+import pipeline as pp
 
 file = Path("api_key.txt")
 
@@ -58,32 +58,18 @@ def chat_reply(message, history, key_from_ui):
     if not key:
         return "No key available."
     try:
-        return fact_check_pipeline(message, key)
+        return pp.fact_check_pipeline(message, key)
     except Exception as e:
         return f"Error: {e}"
-
-
-def ocr_extraction(image_path):
-    if not image_path:
-        return False
-    result = image_to_text(image_path)
-    return result
-
-
-def asr_extraction(audio_path, apikey):
-    if not audio_path:
-        return False
-    result = audio_to_text(audio_path, apikey)
-    return result
 
 
 def check_deepfake(image_path, model):
     if not image_path:
         return False
     if model == "XceptionNet":
-        result = xceptionNet_inference(image_path)
+        result = pp.xceptionNet_inference(image_path)
     elif model == "ResNet":
-        result = resnet_inference(image_path)
+        result = pp.resnet_inference(image_path)
     return result
 
 
@@ -117,7 +103,7 @@ with gr.Blocks(title="AI for Disinformation") as demo:
                     ocr_response_tb = gr.Textbox(label="AI Response", lines=5)
 
             ocr_run_btn.click(
-                fn=ocr_extraction, inputs=[ocr_image], outputs=[ocr_output_tb]
+                fn=pp.image_to_text, inputs=[ocr_image], outputs=[ocr_output_tb]
             )
             ocr_ask_btn.click(
                 fn=chat_reply,
@@ -137,7 +123,7 @@ with gr.Blocks(title="AI for Disinformation") as demo:
                     asr_response_tb = gr.Textbox(label="AI Response", lines=5)
 
             asr_run_btn.click(
-                fn=asr_extraction,
+                fn=pp.audio_to_text,
                 inputs=[asr_audio, api_key_tb],
                 outputs=[asr_output_tb],
             )

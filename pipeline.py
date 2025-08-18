@@ -32,14 +32,18 @@ def fact_check_pipeline(user_input, api_key):
     return evaluation
 
 
-def audio_to_text(file_path, apikey):
-    text = transcribe_audio(file_path, apikey)
+def audio_to_text(audio_path, apikey):
+    if not audio_path:
+        return False
+    text = transcribe_audio(audio_path, apikey)
     return text
 
 
-def image_to_text(file_path):
-    text = ocr_image(file_path)
-    return text
+def image_to_text(image_path):
+    if not image_path:
+        return False
+    result = image_to_text(image_path)
+    return result
 
 
 # Using xceptionNet
