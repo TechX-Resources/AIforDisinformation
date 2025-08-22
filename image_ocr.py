@@ -1,14 +1,19 @@
 from PIL import Image
-import pytesseract
+import easyocr
 import os
+
 
 def ocr_image(image_path):
     try:
-        text = pytesseract.image_to_string(Image.open(image_path))
+        reader = easyocr.Reader(["en"])
+        results = reader.readtext(image_path, detail=0)
+        text = " ".join(results)
+        print(f"Text detected from OCR: {text}")
         return text.strip()
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
         return None
+
 
 def process_folder(folder_path, output_folder="ocr_results"):
     os.makedirs(output_folder, exist_ok=True)
@@ -24,8 +29,9 @@ def process_folder(folder_path, output_folder="ocr_results"):
                 output_file = os.path.join(output_folder, base_name + ".txt")
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(extracted_text)
-    
+
     print("OCR completed for all images.")
+
 
 # Example usage
 if __name__ == "__main__":
