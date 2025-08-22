@@ -43,7 +43,7 @@ def audio_to_text(audio_path, apikey):
 def image_to_text(image_path):
     if not image_path:
         return False
-    result = image_to_text(image_path)
+    result = ocr_image(image_path)
     return result
 
 
