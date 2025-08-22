@@ -94,15 +94,22 @@ def xceptionNet_inference(image_path, model_path="model_weights/xception_deepfak
 def resnet_inference(image_path, model_path="model_weights/resnet18_full_model.pth"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Create model
-    model = models.resnet18(pretrained=False)
-    model.fc = nn.Linear(model.fc.in_features, 2)  # 2 classes
+    # Load the saved model with weights_only=False (if you trust the source)
+    loaded_model = torch.load(model_path, map_location=device, weights_only=False)
 
-    # Load state dict
-    state_dict = torch.load(model_path, map_location=device)
-    if any(k.startswith("module.") for k in state_dict.keys()):
-        state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
-    model.load_state_dict(state_dict)
+    # Check if it's a full model or just state_dict
+    if isinstance(loaded_model, dict):
+        # It's a state dictionary
+        model = models.resnet18(weights=None)  # Fixed deprecated parameter
+        model.fc = nn.Linear(model.fc.in_features, 2)  # 2 classes
+
+        # Handle DataParallel wrapper keys
+        state_dict = loaded_model
+        if any(k.startswith("module.") for k in state_dict.keys()):
+            state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
+        model.load_state_dict(state_dict)
+    else:
+        model = loaded_model
 
     model = model.to(device)
     model.eval()
